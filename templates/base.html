@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% block metatags%}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css', v=0.01) }}" />
+    {% block links %}{% endblock %}
+  </head>
+  <body>
+    <header class="header">
+    </header>
+    <div id="messages">
+      {% for msg in get_flashed_messages() %}
+        <div class="msg" onclick="this.remove();">{{ msg }}<div>&times;</div></div>
+      {% endfor %}
+    </div>
+    <div id="login-modal" style="display: none;"></div>
+    <div class="main-section">
+      <main>
+        {% block content %}
+          <div class="wrapper">
+            {% block wrapped_content %}
+            {% endblock %}
+          </div>
+        {% endblock %}
+      </main>
+    </div>
+    <footer>
+    </footer>
+    {% block jscripts %}
+    {% endblock %}
+  </body>
+</html>

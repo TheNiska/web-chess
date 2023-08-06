@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block metatags%}
+{% endblock %}
+{% block title %}Aldaron.ru — Chess{% endblock %}
+{% block links %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+<style>
+    #board {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: fit-content;
+        margin: 0 auto;
+        border: 1px solid #333;
+    }
+
+    #board .row {
+        display: flex;
+        flex-direction: row;
+    }
+
+    #board .cell {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #board .cell.white {
+        background-color: white;
+    }
+
+    #board .cell.black {
+        background-color: #555;
+    }
+
+    #board .piece-img {
+        width: 90%;
+        height: 90%;
+        object-fit: contain;
+        object-position: center;
+    }
+
+</style>
+{% endblock %}
+{% block content %}
+<div id="board">
+    {% for i in range(8, 0, -1) %}
+        <div class="row">
+            {% for j in range(1, 9) %}
+                {% if ((i + j) % 2) == 0 %}
+                    <div class="cell black" id="{{letters[j] ~ i }}">
+                        {% if board[letters[j] ~ i] != 0 %}
+                            {{ board[letters[j] ~ i].sprite|safe }}
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="cell white" id="{{letters[j] ~ i }}">
+                        {% if board[letters[j] ~ i] != 0 %}
+                            {{ board[letters[j] ~ i].sprite|safe }}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cells = document.querySelectorAll('.cell');
+        var first_move_is_made = false;
+        var prev_point = null;
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', () => {
+                cell.style.background = "#a44";
+                if (first_move_is_made) {
+                  $.ajax({
+                    url: '/',
+                    method: 'POST',
+                    data: {
+                      move_from: prev_point,
+                      move_to: cell.id
+                    },
+                    success: function(response) {
+                        console.log(response.pos1 + ' -> ' + response.pos2);
+                        document.getElementById(response.pos1).innerHTML = "";
+                        document.getElementById(response.pos2).innerHTML = response.pos2_content;
+                    },
+                    error: function(xhr, status, error) {
+                      alert('Произошла ошибка');
+                    }
+                  });
+                  cell.style = null;
+                  document.getElementById(prev_point).style = "";
+                  prev_point = null;
+                  first_move_is_made = false;
+                } else {
+                    first_move_is_made = true;
+                    prev_point = cell.id;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

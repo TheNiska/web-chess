@@ -4,46 +4,7 @@
 {% block title %}Aldaron.ru — Chess{% endblock %}
 {% block links %}
 <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-<style>
-    #board {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: fit-content;
-        margin: 0 auto;
-        border: 1px solid #333;
-    }
-
-    #board .row {
-        display: flex;
-        flex-direction: row;
-    }
-
-    #board .cell {
-        width: 60px;
-        height: 60px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #board .cell.white {
-        background-color: white;
-    }
-
-    #board .cell.black {
-        background-color: #555;
-    }
-
-    #board .piece-img {
-        width: 90%;
-        height: 90%;
-        object-fit: contain;
-        object-position: center;
-    }
-
-</style>
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 {% endblock %}
 {% block content %}
 <div id="board">
@@ -68,6 +29,18 @@
     {% endfor %}
 </div>
 <script>
+    var socket = io();
+
+    socket.on('chess_response', (data) => {
+        const isMoveValid = data.valid;
+        if (isMoveValid) {
+            console.log(data.pos1 + ' -> ' + data.pos2);
+            document.getElementById(data.pos1).innerHTML = "";
+            document.getElementById(data.pos2).innerHTML = data.square_content;
+        }
+        console.log(isMoveValid);
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
         const cells = document.querySelectorAll('.cell');
         var first_move_is_made = false;
@@ -77,22 +50,7 @@
             cell.addEventListener('click', () => {
                 cell.style.background = "#a44";
                 if (first_move_is_made) {
-                  $.ajax({
-                    url: '/',
-                    method: 'POST',
-                    data: {
-                      move_from: prev_point,
-                      move_to: cell.id
-                    },
-                    success: function(response) {
-                        console.log(response.pos1 + ' -> ' + response.pos2);
-                        document.getElementById(response.pos1).innerHTML = "";
-                        document.getElementById(response.pos2).innerHTML = response.pos2_content;
-                    },
-                    error: function(xhr, status, error) {
-                      alert('Произошла ошибка');
-                    }
-                  });
+                  socket.emit('chess_move', {pos1: prev_point, pos2: cell.id});
                   cell.style = null;
                   document.getElementById(prev_point).style = "";
                   prev_point = null;

@@ -1,8 +1,4 @@
-from flask import (render_template, request, session, flash, jsonify,
-                   Blueprint)
 from abc import ABC, abstractmethod
-
-main_bp = Blueprint('bp', __name__)
 
 
 class Piece(ABC):
@@ -96,25 +92,3 @@ class Board:
         self.board[end_pos] = self.board[start_pos]
         self.board[start_pos] = 0
         return True
-
-
-brd = Board()
-
-
-@main_bp.route('/', methods=['GET', 'POST'])
-def chess():
-    if request.method == 'POST':
-        pos1 = request.form.get('move_from')
-        pos2 = request.form.get('move_to')
-        print(f"{pos1} -> {pos2}")
-        isValid = brd.move(pos1, pos2)
-        if isValid:
-            data = {'message': 'Move successful',
-                    'pos1': pos1,
-                    'pos2': pos2,
-                    'pos2_content': brd.board[pos2].sprite}
-
-            return jsonify(data), 200
-
-    letters = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f', 7: 'g', 8: 'h'}
-    return render_template("chess.html", letters=letters, board=brd.board)

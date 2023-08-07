@@ -29,6 +29,10 @@
     background-color: #555;
 }
 
+#board .cell.movable {
+    background-color: yellow;
+}
+
 #board .piece-img {
     width: 90%;
     height: 90%;

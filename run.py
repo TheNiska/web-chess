@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_socketio import SocketIO, emit
 from chess import Board
 from views import main_bp
@@ -28,6 +28,15 @@ def handle_move(data):
     msg['square_content'] = square_content
 
     emit('chess_response', msg, broadcast=True)
+
+
+@socketio.on('piece_touched')
+def show_moves(data):
+    pos = data['pos']
+    cells = app.brd.board[pos].can_go_to(app.brd.board, asString=True)
+    msg = {'piece': pos,
+           'moves': list(cells)}
+    emit('valid_moves', msg, broadcast=True)
 
 
 if __name__ == "__main__":

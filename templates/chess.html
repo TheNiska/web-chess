@@ -30,6 +30,7 @@
 </div>
 <script>
     var socket = io();
+    let visibleMoves = null;
 
     socket.on('chess_response', (data) => {
         const isMoveValid = data.valid;
@@ -41,6 +42,15 @@
         console.log(isMoveValid);
     });
 
+    socket.on('valid_moves', (data) => {
+        const currentPiece = data.piece;
+        visibleMoves = data.moves;
+
+        for (let i = 0; i < visibleMoves.length; i++) {
+            document.getElementById(visibleMoves[i]).classList.add('movable');
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
         const cells = document.querySelectorAll('.cell');
         var first_move_is_made = false;
@@ -50,14 +60,18 @@
             cell.addEventListener('click', () => {
                 cell.style.background = "#a44";
                 if (first_move_is_made) {
+                  for (let i = 0; i < visibleMoves.length; i++) {
+                    document.getElementById(visibleMoves[i]).classList.toggle('movable');
+                  }
                   socket.emit('chess_move', {pos1: prev_point, pos2: cell.id});
                   cell.style = null;
                   document.getElementById(prev_point).style = "";
                   prev_point = null;
                   first_move_is_made = false;
                 } else {
-                    first_move_is_made = true;
                     prev_point = cell.id;
+                    socket.emit('piece_touched', {pos: prev_point});
+                    first_move_is_made = true;
                 }
             });
         });

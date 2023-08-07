@@ -23,18 +23,29 @@ class Pawn(Piece):
     def move(self):
         print('sth')
 
-    def can_go_to(self, board) -> set:
+    def can_go_to(self, board, asString=False) -> set:
+        moves = set()
 
         if not self.isMoved:
             if self.color == 'white':
-                return {(self.x, self.y + 1), (self.x, self.y + 2)}
+                moves.update({(self.x, self.y + 1), (self.x, self.y + 2)})
             else:
-                return {(self.x, self.y - 1), (self.x, self.y - 2)}
+                moves.update({(self.x, self.y - 1), (self.x, self.y - 2)})
         else:
             if self.color == 'white':
-                return {(self.x, self.y + 1)}
+                moves.update({(self.x, self.y + 1)})
             else:
-                return {(self.x, self.y - 1)}
+                moves.update({(self.x, self.y - 1)})
+
+        if not asString:
+            return moves
+
+        moves_str = set()
+        for move in moves:
+            xy = chr(move[0] + 96) + str(move[1])
+            moves_str.add(xy)
+
+        return moves_str
 
     def go(self, x, y):
         self.x = x

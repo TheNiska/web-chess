@@ -7,7 +7,9 @@ class Piece(ABC):
 
     def __init__(self, name, position, color):
         self.name = name
-        self.position = position
+        self.isMoved = False
+        self.x = ord(position[0]) - 96
+        self.y = int(position[1])
         self.color = color
         self.sprite = f"{self.image_part1}{name}_{color}.png'" \
                       f"{self.image_part2}"
@@ -20,6 +22,23 @@ class Piece(ABC):
 class Pawn(Piece):
     def move(self):
         print('sth')
+
+    def can_go_to(self, board) -> set:
+
+        if not self.isMoved:
+            if self.color == 'white':
+                return {(self.x, self.y + 1), (self.x, self.y + 2)}
+            else:
+                return {(self.x, self.y - 1), (self.x, self.y - 2)}
+        else:
+            if self.color == 'white':
+                return {(self.x, self.y + 1)}
+            else:
+                return {(self.x, self.y - 1)}
+
+    def go(self, x, y):
+        self.x = x
+        self.y = y
 
 
 class Queen(Piece):
@@ -86,9 +105,15 @@ class Board:
         self.board = board
 
     def move(self, start_pos, end_pos):
-        # isValidMove = self.board[start_pos].can_go_there()
-        # but the method of piece can_go_there() must know board,
-        # so how to interact between Piece objects and the Board object?
-        self.board[end_pos] = self.board[start_pos]
-        self.board[start_pos] = 0
-        return True
+        valid_poses = self.board[start_pos].can_go_to(self.board)
+        x_end = ord(end_pos[0]) - 96
+        y_end = int(end_pos[1])
+
+        if (x_end, y_end) in valid_poses:
+            self.board[end_pos] = self.board[start_pos]
+            self.board[start_pos] = 0
+            self.board[end_pos].go(x_end, y_end)
+            self.board[end_pos].isMoved = True
+            return True
+        else:
+            return False
